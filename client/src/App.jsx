@@ -30,7 +30,7 @@ function App() {
   const fetchEmails = async (date = null) => {
     try {
       setLoading(true);
-      let url = 'http://localhost:3001/api/emails';
+      let url = '/api/emails';
       if (date) {
         url += `?date=${date}`;
       }
@@ -53,7 +53,7 @@ function App() {
   };
 
   const handleDownload = (uid, filename) => {
-    window.open(`http://localhost:3001/api/emails/${uid}/attachments/${filename}`, '_blank');
+    window.open(`/api/emails/${uid}/attachments/${filename}`, '_blank');
   };
 
   return (
