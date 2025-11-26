@@ -289,3 +289,115 @@ body {
   border-radius: 6px;
   margin: 15px;
 }
+
+/* Botão de voltar para mobile */
+.back-button {
+  display: none; /* Oculto por padrão no desktop */
+}
+
+/* Responsividade para Mobile */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  /* Sidebar ocupa toda largura no mobile */
+  .sidebar {
+    width: 100%;
+    min-width: 100%;
+    border-right: none;
+  }
+
+  /* Oculta a sidebar quando um email está selecionado */
+  .sidebar.hidden-mobile {
+    display: none;
+  }
+
+  /* Main content ocupa toda tela no mobile */
+  .main-content {
+    width: 100%;
+    padding: 15px;
+  }
+
+  /* Oculta o conteúdo principal quando nenhum email está selecionado */
+  .main-content.hidden-mobile {
+    display: none;
+  }
+
+  /* Mostra o botão de voltar no mobile */
+  .back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    transition: background-color 0.2s;
+    box-shadow: var(--shadow-light);
+  }
+
+  .back-button:hover {
+    background-color: var(--primary-dark);
+  }
+
+  .back-button::before {
+    content: '←';
+    font-size: 1.3rem;
+  }
+
+  /* Ajustes do email-detail para mobile */
+  .email-detail {
+    padding: 15px;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .email-meta h1 {
+    font-size: 1.3rem;
+  }
+
+  /* Ajustes da lista de emails */
+  .email-item {
+    padding: 15px;
+  }
+
+  .email-from {
+    font-size: 0.95rem;
+    max-width: 65%;
+  }
+
+  .email-date {
+    font-size: 0.7rem;
+  }
+
+  .email-subject {
+    font-size: 0.85rem;
+  }
+
+  /* Header ajustado para mobile */
+  .header h2 {
+    font-size: 1.1rem;
+  }
+
+  .header button {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  /* Attachments em coluna no mobile */
+  .attachments ul {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .attachment-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

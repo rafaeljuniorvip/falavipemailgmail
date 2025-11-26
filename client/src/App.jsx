@@ -14,6 +14,19 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(formattedToday);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detecta se está em mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     // Carrega e-mails da data atual ao montar
@@ -56,9 +69,13 @@ function App() {
     window.open(`/api/emails/${uid}/attachments/${filename}`, '_blank');
   };
 
+  const handleBackToList = () => {
+    setSelectedEmail(null);
+  };
+
   return (
     <div className="app-container">
-      <div className="sidebar">
+      <div className={`sidebar ${isMobile && selectedEmail ? 'hidden-mobile' : ''}`}>
         <div className="header">
           <div className="header-top">
             <h2>Caixa de Entrada</h2>
@@ -100,10 +117,15 @@ function App() {
           {loading && emails.length === 0 && <p className="loading-msg">Carregando e-mails...</p>}
         </div>
       </div>
-      
-      <div className="main-content">
+
+      <div className={`main-content ${isMobile && !selectedEmail ? 'hidden-mobile' : ''}`}>
         {selectedEmail ? (
           <div className="email-detail">
+            {isMobile && (
+              <button className="back-button" onClick={handleBackToList}>
+                Voltar para lista
+              </button>
+            )}
             <div className="email-meta">
               <h1>{selectedEmail.subject}</h1>
               <p><strong>De:</strong> {selectedEmail.from}</p>
