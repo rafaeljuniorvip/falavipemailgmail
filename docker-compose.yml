@@ -26,11 +26,11 @@ services:
         order: stop-first
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.falavipagents-backend.entrypoints=websecure"
-        - "traefik.http.routers.falavipagents-backend.rule=Host(`${BACKEND_HOST}`)"
-        - "traefik.http.routers.falavipagents-backend.service=falavipagents-backend-service"
-        - "traefik.http.routers.falavipagents-backend.tls.certresolver=letsencryptresolver"
-        - "traefik.http.services.falavipagents-backend-service.loadbalancer.server.port=3001"
+        - "traefik.http.routers.gmail-viewer.entrypoints=websecure"
+        - "traefik.http.routers.gmail-viewer.rule=Host(`gmailinterno.pfoita.com.br`)"
+        - "traefik.http.routers.gmail-viewer.service=gmail-viewer-service"
+        - "traefik.http.routers.gmail-viewer.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.gmail-viewer-service.loadbalancer.server.port=3001"
     networks:
       - minha_rede
     healthcheck:
