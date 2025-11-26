@@ -2,11 +2,17 @@ const express = require('express');
 const imap = require('imap-simple');
 const { simpleParser } = require('mailparser');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Servir arquivos estáticos do client em produção
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, 'public')));
+}
 
 const config = {
     imap: {
@@ -125,7 +131,7 @@ app.get('/api/emails/:uid/attachments/:filename', async (req, res) => {
     try {
         const { uid, filename } = req.params;
         const data = await fetchAttachment(uid, filename);
-        
+
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.send(data);
     } catch (error) {
@@ -133,6 +139,18 @@ app.get('/api/emails/:uid/attachments/:filename', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Servir o index.html do React para todas as rotas não API em produção
+if (process.env.NODE_ENV === 'production') {
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
+}
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
