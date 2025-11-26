@@ -147,8 +147,13 @@ app.get('/api/health', (req, res) => {
 
 // Servir o index.html do React para todas as rotas não API em produção
 if (process.env.NODE_ENV === 'production') {
-    app.get('/*', (req, res) => {
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    app.use((req, res, next) => {
+        // Se não é uma rota de API, servir o index.html
+        if (!req.path.startsWith('/api')) {
+            res.sendFile(path.join(__dirname, 'public', 'index.html'));
+        } else {
+            next();
+        }
     });
 }
 
