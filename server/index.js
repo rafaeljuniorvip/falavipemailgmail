@@ -26,40 +26,59 @@ const config = {
     }
 };
 
-// Helper para conectar e buscar emails
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const formatImapDate = (d) => `${d.getUTCDate()}-${months[d.getUTCMonth()]}-${d.getUTCFullYear()}`;
+
+// Helper para processar mensagens IMAP
+async function processMessages(messages) {
+    const recentMessages = messages.reverse();
+
+    return Promise.all(recentMessages.map(async (item) => {
+        const all = item.parts.find(part => part.which === '');
+        const id = item.attributes.uid;
+        const idHeader = "Imap-Id: "+id+"\r\n";
+
+        const parsed = await simpleParser(idHeader + all.body);
+
+        return {
+            id: item.attributes.uid,
+            from: parsed.from ? parsed.from.text : 'Desconhecido',
+            subject: parsed.subject,
+            date: parsed.date,
+            html: parsed.html || parsed.textAsHtml || parsed.text,
+            attachments: parsed.attachments.map(att => ({
+                filename: att.filename,
+                contentType: att.contentType,
+                size: att.size,
+                checksum: att.checksum
+            }))
+        };
+    }));
+}
+
+// Helper para conectar e buscar emails (dia único ou últimos 20)
 async function fetchEmails(dateFilter = null) {
     try {
         const connection = await imap.connect(config);
         const box = await connection.openBox('INBOX');
-        
+
         let searchCriteria;
 
         if (dateFilter) {
-            // Se tem filtro de data, busca especificamente por aquela data
-            // O formato deve ser algo que a lib 'imap' aceite ou string padrao IMAP
-            // Ex: SINCE "20-Nov-2023" BEFORE "21-Nov-2023"
-            // A lib imap-simple passa arrays de string direto pro node-imap
             const dateObj = new Date(dateFilter);
-            // Ajusta para o início do dia em UTC para consistência
             dateObj.setUTCHours(0, 0, 0, 0);
 
             const nextDay = new Date(dateObj);
-            nextDay.setUTCDate(dateObj.getUTCDate() + 1); // Avança um dia em UTC
+            nextDay.setUTCDate(dateObj.getUTCDate() + 1);
             nextDay.setUTCHours(0, 0, 0, 0);
 
-            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const formatImapDate = (d) => `${d.getUTCDate()}-${months[d.getUTCMonth()]}-${d.getUTCFullYear()}`;
-
-            // Busca emails DAQUELE dia (SINCE dia E BEFORE dia+1)
             searchCriteria = [
                 ['SINCE', formatImapDate(dateObj)],
                 ['BEFORE', formatImapDate(nextDay)]
             ];
             console.log(`Buscando por data: SINCE ${formatImapDate(dateObj)} BEFORE ${formatImapDate(nextDay)}`);
         } else {
-            // Lógica original: últimos 20
             const totalMessages = box.messages.total;
-            // console.log(`Total de mensagens na caixa: ${totalMessages}`);
 
             if (totalMessages === 0) {
                 connection.end();
@@ -68,7 +87,7 @@ async function fetchEmails(dateFilter = null) {
 
             const fetchCount = 20;
             const start = Math.max(1, totalMessages - fetchCount + 1);
-            searchCriteria = [`${start}:*`]; 
+            searchCriteria = [`${start}:*`];
             console.log(`Buscando últimos 20 (intervalo: ${searchCriteria})`);
         }
 
@@ -79,31 +98,44 @@ async function fetchEmails(dateFilter = null) {
         };
 
         const messages = await connection.search(searchCriteria, fetchOptions);
-        
-        // Ordenar por ID reverso (mais recente primeiro)
-        const recentMessages = messages.reverse();
+        const emails = await processMessages(messages);
 
-        const emails = await Promise.all(recentMessages.map(async (item) => {
-            const all = item.parts.find(part => part.which === '');
-            const id = item.attributes.uid;
-            const idHeader = "Imap-Id: "+id+"\r\n";
-            
-            const parsed = await simpleParser(idHeader + all.body);
-            
-            return {
-                id: item.attributes.uid,
-                from: parsed.from ? parsed.from.text : 'Desconhecido',
-                subject: parsed.subject,
-                date: parsed.date,
-                html: parsed.html || parsed.textAsHtml || parsed.text,
-                attachments: parsed.attachments.map(att => ({
-                    filename: att.filename,
-                    contentType: att.contentType,
-                    size: att.size,
-                    checksum: att.checksum
-                }))
-            };
-        }));
+        connection.end();
+        return emails;
+    } catch (err) {
+        console.error("Erro IMAP:", err);
+        throw err;
+    }
+}
+
+// Helper para buscar emails por intervalo de datas
+async function fetchEmailsByDateRange(startDate, endDate) {
+    try {
+        const connection = await imap.connect(config);
+        await connection.openBox('INBOX');
+
+        const startObj = new Date(startDate);
+        startObj.setUTCHours(0, 0, 0, 0);
+
+        const endObj = new Date(endDate);
+        endObj.setUTCDate(endObj.getUTCDate() + 1); // Inclui o último dia
+        endObj.setUTCHours(0, 0, 0, 0);
+
+        const searchCriteria = [
+            ['SINCE', formatImapDate(startObj)],
+            ['BEFORE', formatImapDate(endObj)]
+        ];
+
+        console.log(`Buscando por range: SINCE ${formatImapDate(startObj)} BEFORE ${formatImapDate(endObj)}`);
+
+        const fetchOptions = {
+            bodies: ['HEADER', 'TEXT', ''],
+            struct: true,
+            markSeen: false
+        };
+
+        const messages = await connection.search(searchCriteria, fetchOptions);
+        const emails = await processMessages(messages);
 
         connection.end();
         return emails;
@@ -117,7 +149,15 @@ async function fetchEmails(dateFilter = null) {
 
 app.get('/api/emails', async (req, res) => {
     try {
-        const { date } = req.query; // Lê o parametro ?date=YYYY-MM-DD
+        const { date, startDate, endDate } = req.query;
+
+        // Se tiver range de datas, usa fetchEmailsByDateRange
+        if (startDate && endDate) {
+            const emails = await fetchEmailsByDateRange(startDate, endDate);
+            return res.json(emails);
+        }
+
+        // Caso contrário, usa fetchEmails (dia único ou últimos 20)
         const emails = await fetchEmails(date);
         res.json(emails);
     } catch (error) {

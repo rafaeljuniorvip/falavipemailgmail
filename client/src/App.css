@@ -478,3 +478,230 @@ body {
     justify-content: center;
   }
 }
+
+/* ==================== */
+/* Página de Relatórios */
+/* ==================== */
+
+.reports-container {
+  min-height: 100vh;
+  background-color: var(--light-bg);
+  padding: 20px;
+}
+
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+}
+
+.reports-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+
+.reports-nav button {
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.reports-nav button:hover {
+  background-color: var(--primary-dark);
+}
+
+.reports-filters {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-light);
+}
+
+.date-range-picker {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.date-range-picker label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.date-range-picker input[type="date"] {
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  min-width: 150px;
+}
+
+.date-range-picker button {
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.date-range-picker button:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+}
+
+.date-range-picker button:disabled {
+  background-color: var(--secondary-color);
+  cursor: not-allowed;
+}
+
+.reports-error {
+  margin: 0 0 20px 0;
+}
+
+.reports-table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+}
+
+.reports-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.reports-table thead {
+  background-color: var(--light-bg);
+}
+
+.reports-table th {
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-color);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.reports-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+
+.reports-table tbody tr:nth-child(even) {
+  background-color: var(--light-bg);
+}
+
+.reports-table tbody tr.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.reports-table tbody tr.clickable-row:hover {
+  background-color: #e0f2fe;
+}
+
+.attachments-count {
+  text-align: center;
+}
+
+.preview-cell {
+  color: var(--secondary-color);
+  font-size: 0.85rem;
+}
+
+.reports-summary {
+  margin-top: 20px;
+  padding: 15px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+}
+
+.reports-summary p {
+  margin: 0;
+  color: var(--text-color);
+}
+
+/* Header Actions */
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Mobile Responsiveness para Reports */
+@media (max-width: 768px) {
+  .reports-container {
+    padding: 10px;
+  }
+
+  .reports-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .reports-header h1 {
+    font-size: 1.2rem;
+  }
+
+  .reports-nav button {
+    width: 100%;
+  }
+
+  .date-range-picker {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .date-range-picker label {
+    width: 100%;
+  }
+
+  .date-range-picker input[type="date"] {
+    width: 100%;
+  }
+
+  .date-range-picker button {
+    width: 100%;
+  }
+
+  .reports-table-container {
+    overflow-x: auto;
+  }
+
+  .reports-table {
+    min-width: 700px;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+  }
+
+  .header-actions button {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+}
